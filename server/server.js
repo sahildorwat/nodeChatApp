@@ -15,6 +15,9 @@ app.use(express.static(publicPath));
 io.on('connection',(socket) => {
     console.log('added new connection');
 
+    socket.emit('newMessage', {from: 'admin' , text: 'welcome to chat app'})
+    socket.broadcast.emit('newMessage', {from: 'admin' , text: 'new user joined'})
+
     socket.on('disconnect', () => {
         console.log('sclient disconnected')
     })
