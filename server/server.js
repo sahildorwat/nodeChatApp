@@ -12,16 +12,23 @@ const io = socketIO(server);
 
 app.use(express.static(publicPath));
 
-io.on('connection', (socket) => {
-    console.log(socket);
-    console.log('starting new connection')
+io.on('connection',(socket) => {
+    console.log('added new connection');
 
     socket.on('disconnect', () => {
-        console.log('disconnected')
+        console.log('sclient disconnected')
+    })
+
+    socket.emit('newMessage', { message: 'heyyy ... welcome to chat app'})
+
+    socket.on('newMessage', (message) => {
+        console.log(message);
     })
 })
 
-server.listen(port, () => {
+
+
+server.listen(port, function () {
     console.log(`server is runnig on post ${port}`);
 })
 
