@@ -19,10 +19,11 @@ io.on('connection',(socket) => {
         console.log('sclient disconnected')
     })
 
-    socket.emit('newMessage', { message: 'heyyy ... welcome to chat app'})
+    socket.on('createMessage', (message) => {
+        io.emit('newMessage', {from: message.from, 
+                                text: message.text,
+                                createdAt: new Date().getTime()});
 
-    socket.on('newMessage', (message) => {
-        console.log(message);
     })
 })
 
