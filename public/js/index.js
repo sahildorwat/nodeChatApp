@@ -22,3 +22,30 @@ socket.on('newMessage', function(message){
     li.text(`${message.from}: ${message.text}`);
     jQuery('#messages').append(li);
 });
+
+socket.on('newLocationMessage', function(message) {
+    const li = jQuery('<li></li>');
+    const a = jQuery('<a target="_blank"> My current location</a>');
+    li.text(`${message.from}:`);
+    a.attr('href',message.url)
+    li.append(a);
+    jQuery('#messages').append(li);
+})
+
+const geoloc = jQuery('#geolocation')
+geoloc.on('click', function(){
+    if(!navigator.geolocation) {
+        alert('this facility is not allowed in yout browser')
+    } else {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            socket.emit('createLocationMessage', {from: 'sahil', latitude: position.coords.latitude ,
+                                          longitude: position.coords.latitude })
+            
+
+        }, function(){
+            alert('You have not allowed permissions for geolocation')
+        })
+
+    }
+
+})
