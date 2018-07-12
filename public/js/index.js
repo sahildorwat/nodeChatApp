@@ -22,20 +22,17 @@ jQuery('#message-form').on('submit', function(event){
 
 socket.on('newMessage', function(message){
     const createdTimestamp = moment(message.createdAt).format('h:mm a')
-    const li = jQuery('<li></li>');
-    li.text(`${message.from} ${createdTimestamp}: ${message.text}`);
-    jQuery('#messages').append(li);
+    const template = jQuery('#message-template').html();
+    const html = Mustache.render(template, {...message, createdAt: createdTimestamp })
+    jQuery('#messages').append(html);
 });
 
-socket.on('newLocationMessage', function(message) {
+socket.on('newLocationMessage', function(message){
     const createdTimestamp = moment(message.createdAt).format('h:mm a')
-    const li = jQuery('<li></li>');
-    const a = jQuery('<a target="_blank"> My current location</a>');
-    li.text(`${message.from} ${createdTimestamp}:`);
-    a.attr('href',message.url)
-    li.append(a);
-    jQuery('#messages').append(li);
-})
+    const template = jQuery('#location-message-template').html();
+    const html = Mustache.render(template, {...message, createdAt: createdTimestamp })
+    jQuery('#messages').append(html);
+});
 
 const geolocationButton = jQuery('#send-location')
 geolocationButton.on('click', function(){
