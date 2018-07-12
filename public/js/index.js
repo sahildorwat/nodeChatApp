@@ -11,8 +11,11 @@ socket.on('disconnect',function() {
 
 jQuery('#message-form').on('submit', function(event){
     event.preventDefault();
-    socket.emit('createMessage',{from: 'sahil', text: jQuery('[name=message]').val()}, function(){
+    const messageTextBox = jQuery('[name=message]');
+    socket.emit('createMessage',{from: 'sahil', text: messageTextBox.val()}, function(){
         console.log('got it.')
+        messageTextBox.val('');
+
     })
 })
 
@@ -32,20 +35,20 @@ socket.on('newLocationMessage', function(message) {
     jQuery('#messages').append(li);
 })
 
-const geoloc = jQuery('#geolocation')
-geoloc.on('click', function(){
+const geolocationButton = jQuery('#send-location')
+geolocationButton.on('click', function(){
     if(!navigator.geolocation) {
-        alert('this facility is not allowed in yout browser')
-    } else {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            socket.emit('createLocationMessage', {from: 'sahil', latitude: position.coords.latitude ,
-                                          longitude: position.coords.latitude })
-            
+        return alert('this facility is not allowed in yout browser')
+    } 
+    
+    geolocationButton.attr('disabled', 'disabled').text('sending location...');
 
-        }, function(){
-            alert('You have not allowed permissions for geolocation')
-        })
-
-    }
-
+    navigator.geolocation.getCurrentPosition(function(position) {
+        geolocationButton.removeAttr('disabled').text('send location');
+        socket.emit('createLocationMessage', {from: 'sahil', latitude: position.coords.latitude ,
+                                        longitude: position.coords.latitude })
+    }, function(){
+        geolocationButton.removeAttr('disabled').text('send location');
+        alert('You have not allowed permissions for geolocation')
+    })
 })
