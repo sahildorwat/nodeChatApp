@@ -4,34 +4,46 @@ const socketIO = require('socket.io')
 const http = require('http')
 
 const { isRealString } = require('./utils/validation')
+const { Users } = require('./utils/users')
+const { generateMessage, generateLocationMessage} = require('./utils/message')
+
 const port = process.env.PORT || 3000;
 const publicPath = path.join(__dirname, '..', 'public');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-const { generateMessage, generateLocationMessage} = require('./utils/message')
 
 app.use(express.static(publicPath));
+const users = new Users();
 
 io.on('connection',(socket) => {
     console.log('added new connection');
 
-    socket.on('join', (param, callback) => {
-        console.log('inside join', param.name , param.room)
-        if (!isRealString(param.name) || !isRealString(param.room)) {
-            callback('Need both name and room.')
+    socket.on('join', (params, callback) => {
+        console.log('inside join', params.name , params.room)
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            return callback('Need both name and room.')
         }
 
+        socket.join(params.room)
+        users.removeUser(socket.id)
+        users.addUser( socket.id ,  params.name, params.room )
+
+        io.to(params.room).emit('updateUserList', users.getUserList(params.room))
+
+        socket.emit('newMessage', generateMessage('Admin', 'welcome to chat app'))
+        socket.broadcast.to(params.room).emit('newMessage', generateMessage( 'admin', `${params.name}  joined the room`))
         callback();
     });
 
-
-
-    socket.emit('newMessage', generateMessage('admin', 'welcome to chat app'))
-    socket.broadcast.emit('newMessage', generateMessage( 'admin', 'new user joined'))
-
     socket.on('disconnect', () => {
-        console.log('sclient disconnected')
+        const user = users.removeUser(socket.id)
+        if(user){
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room))
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} left chat room`))
+
+        }
+        console.log('client disconnected')
     })
 
     socket.on('createMessage', (message, callback) => {

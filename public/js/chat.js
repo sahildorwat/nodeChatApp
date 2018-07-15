@@ -44,6 +44,18 @@ jQuery('#message-form').on('submit', function(event){
     })
 })
 
+socket.on('updateUserList', (list) => {
+    console.log( 'updated user list is ', list)
+
+    const ol = jQuery('<ol></ol>')
+
+    list.forEach( user => {
+        ol.append(jQuery('<li></li>').text(user) )
+    });
+
+    jQuery('#users').html(ol);
+})
+
 socket.on('newMessage', function(message){
     const createdTimestamp = moment(message.createdAt).format('h:mm a')
     const template = jQuery('#message-template').html();
