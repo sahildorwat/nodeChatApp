@@ -30,7 +30,6 @@ socket.on('connect',function() {
     })
 })
 
-
 socket.on('disconnect',function() {
     console.log('connected to server');
 })
@@ -38,10 +37,9 @@ socket.on('disconnect',function() {
 jQuery('#message-form').on('submit', function(event){
     event.preventDefault();
     const messageTextBox = jQuery('[name=message]');
-    socket.emit('createMessage',{from: 'sahil', text: messageTextBox.val()}, function(){
-        console.log('got it.')
-        messageTextBox.val('');
-    })
+        socket.emit('createMessage',{ text: messageTextBox.val()}, function(){
+            messageTextBox.val('');
+        })
 })
 
 socket.on('updateUserList', (list) => {
